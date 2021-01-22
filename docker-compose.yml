@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    restart: always
+    command: python /usr/src/app/manage.py runserver 0.0.0.0:8000
+#    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - .:/usr/src/app
+      - static_volume:/opt/services/djangoapp/static
+      - media_volume:/opt/services/djangoapp/media
+    env_file:
+      - ./.env
+    ports:
+      - 8000:8000
+    depends_on:
+      - app-db
+  app-db:
+    image: library/postgres:12-alpine
+    environment:
+      - "POSTGRES_HOST_AUTH_METHOD=trust"
+    restart: always
+    volumes:
+      - app_postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env
+    ports:
+      - "5400:5432"
+volumes:
+  app_postgres_data:
+  static_volume:
+  media_volume:
